@@ -36,8 +36,57 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  double dollar = 0;
+  double dolar = 0;
   double euro = 0;
+
+  final realController = TextEditingController();
+  final dolarController = TextEditingController();
+  final euroController = TextEditingController();
+
+  _realOnChange(String text) {
+    if(text.isEmpty) {
+      clearAllFields();
+      return;
+    }
+
+    double real = double.parse(text);
+
+    dolarController.text = (real/dolar).toStringAsFixed(2);
+    euroController.text = (real/euro).toStringAsFixed(2);
+
+    print(text);
+  }
+
+  _dolarOnChange(String text) {
+    if(text.isEmpty) {
+      clearAllFields();
+      return;
+    }
+
+    double dolarTipped = double.parse(text);
+
+    realController.text = (dolarTipped * this.dolar).toStringAsFixed(2);
+    euroController.text = (dolarTipped * this.dolar / euro).toStringAsFixed(2);
+
+  }
+
+  _euroOnChange(String text) {
+    if(text.isEmpty) {
+      clearAllFields();
+      return;
+    }
+
+    double euroTipped = double.parse(text);
+
+    realController.text = (euroTipped * this.euro).toStringAsFixed(2);
+    dolarController.text = (euroTipped * this.euro / dolar).toStringAsFixed(2);
+  }
+
+  clearAllFields() {
+    realController.text = '';
+    dolarController.text = '';
+    euroController.text = '';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -69,8 +118,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     ),
                   );
                 } else {
-                  dollar =
-                      snapshot.data!['results']["currencies"]["USD"]['buy'];
+                  dolar = snapshot.data!['results']["currencies"]["USD"]['buy'];
                   euro = snapshot.data!['results']["currencies"]["EUR"]['buy'];
                   return SingleChildScrollView(
                     padding: EdgeInsets.all(10),
@@ -81,11 +129,11 @@ class _MyHomePageState extends State<MyHomePage> {
                           Icons.monetization_on_rounded,
                           size: 160,
                         ),
-                        TextFieldBuilder('Reais', 'R\$ '),
+                        textFieldBuilder('Reais', 'R\$ ', realController, _realOnChange),
                         SizedBox(height: 20,),
-                        TextFieldBuilder('Dollar', ' \$ '),
+                        textFieldBuilder('Dolar', ' \$ ', dolarController, _dolarOnChange),
                         SizedBox(height: 20,),
-                        TextFieldBuilder('Euro', ' € '),
+                        textFieldBuilder('Euro', ' € ', euroController, _euroOnChange),
                       ],
                     ),
                   );
@@ -96,12 +144,15 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 }
 
-Widget TextFieldBuilder(String label, String prefix) {
+Widget textFieldBuilder(String label, String prefix, TextEditingController controller, Function(String)? function) {
   return TextField(
     decoration: InputDecoration(
         labelText: label,
         border: OutlineInputBorder(),
         prefixText: prefix
     ),
+    controller: controller,
+    onChanged: function,
+    keyboardType: TextInputType.numberWithOptions(decimal: true),
   );
 }
